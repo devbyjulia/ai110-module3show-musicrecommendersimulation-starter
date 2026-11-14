@@ -21,13 +21,38 @@ Explain your design in plain language.
 
 Some prompts to answer:
 
-- What features does each `Song` use in your system
+- **What features does each `Song` use in your system**
   - For example: genre, mood, energy, tempo
-- What information does your `UserProfile` store
-- How does your `Recommender` compute a score for each song
-- How do you choose which songs to recommend
 
-You can include a simple diagram or bullet list if helpful.
+  Each song contains the following features: genre, mood, energy, tempo_bpm, valence, danceability, and acousticness.
+
+- **What information does your `UserProfile` store**
+  
+  `UserProfile` stores `favorite_genre`, `favorite_mood`, `target_energy`, and `likes_acoustic`.
+
+- **How does your `Recommender` compute a score for each song**
+  
+  `Recommender` computes a score for each song with the weighted sum:
+  ```
+      score = 2.0 * (genre match)
+      + 1.0 * (mood match)
+      + 1.5 * (1 - |target_energy - energy|)
+      + 0.5 * (acousticness if likes_acoustic else 1 - acousticness)
+    ```
+
+- **How do you choose which songs to recommend**
+
+  The system keeps the scoring rule and the ranking rule separate:
+
+  1. Score every song. `score_song()` applies the weighted formula above to each song in the catalog and returns a score along with the reasons behind it (e.g., "genre match (+2.0)", "energy close to your target (+1.43)").
+  2. Rank the list. `recommend_songs()` sorts all songs by score, highest first. If two songs tie, the one whose energy is closer to the user's `target_energy` comes first.
+  3. Return the top k. The top `k` songs (default 5) are returned, each with its score and an explanation built from its reasons.
+
+  ```
+  catalog ──► score_song() for each song ──► sort by score (high → low) ──► top k + explanations
+  ```
+
+  Because genre is worth the most points (2.0), songs in the user's favorite genre usually rank first. Genre doesn't automatically win, though: a song that matches the user's mood, energy, and acoustic preference can outrank a same-genre song that sounds very different. Since the catalog has only 1–3 songs per genre, the rest of the top 5 is mostly decided by energy and mood.
 
 ---
 
