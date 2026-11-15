@@ -17,28 +17,43 @@ Replace this paragraph with your own summary of what your version does.
 
 ## How The System Works
 
-Explain your design in plain language.
-
-Some prompts to answer:
+This is a content-based recommender. It compares the features of each song with a user's stated taste profile, scores every song, and returns the best matches. It doesn't use listening history or other users' behavior.
 
 - **What features does each `Song` use in your system**
-  - For example: genre, mood, energy, tempo
 
-  Each song contains the following features: genre, mood, energy, tempo_bpm, valence, danceability, and acousticness.
+  Each song in `data/songs.csv` has genre, mood, energy, tempo_bpm, valence, danceability, and acousticness. The scoring formula uses four of them: genre, mood, energy, and acousticness.
+
+  - tempo_bpm is left out because it mostly moves with energy and uses a different scale (BPM).
+  - valence is left out because it mostly overlaps with mood.
+  - danceability is left out to keep the first version simple; it's a candidate for a later experiment.
 
 - **What information does your `UserProfile` store**
-  
-  `UserProfile` stores `favorite_genre`, `favorite_mood`, `target_energy`, and `likes_acoustic`.
+
+  `UserProfile` stores `favorite_genre`, `favorite_mood`, `target_energy` (a number from 0.0 to 1.0), and `likes_acoustic` (True/False). Example:
+
+  ```python
+  {"favorite_genre": "rock", "favorite_mood": "intense", "target_energy": 0.90, "likes_acoustic": False}
+  ```
 
 - **How does your `Recommender` compute a score for each song**
-  
-  `Recommender` computes a score for each song with the weighted sum:
+
+  Each song gets a score from a weighted sum (maximum 5.0):
+
   ```
-      score = 2.0 * (genre match)
-      + 1.0 * (mood match)
-      + 1.5 * (1 - |target_energy - energy|)
-      + 0.5 * (acousticness if likes_acoustic else 1 - acousticness)
-    ```
+  score = 2.0 * (genre match)
+        + 1.0 * (mood match)
+        + 1.5 * (1 - |target_energy - energy|)
+        + 0.5 * (acousticness if likes_acoustic else 1 - acousticness)
+  ```
+
+  | Feature | Weight | How it's scored | Why this weight |
+  |---|---|---|---|
+  | Genre | 2.0 | Exact match: 2.0, otherwise 0 | Genre is the most stable part of a person's taste, so a mismatch is the most noticeable mistake. |
+  | Energy | 1.5 | Closeness to the target: a perfect match earns 1.5 | It has the widest spread in the data and ranks songs in a graded way, not all-or-nothing. |
+  | Mood | 1.0 | Exact match: 1.0, otherwise 0 | Mood matters but changes with the situation, and similar moods (chill, relaxed, focused) don't match as text. |
+  | Acousticness | 0.5 | Rewards acoustic songs if `likes_acoustic`, non-acoustic songs if not | It overlaps heavily with energy, so a small weight avoids counting the same signal twice. |
+
+  **Worked example:** for the profile above, *Storm Runner* (rock, intense, energy 0.91, acousticness 0.10) scores 2.0 + 1.0 + 1.49 + 0.45 = **4.94**.
 
 - **How do you choose which songs to recommend**
 
@@ -53,6 +68,14 @@ Some prompts to answer:
   ```
 
   Because genre is worth the most points (2.0), songs in the user's favorite genre usually rank first. Genre doesn't automatically win, though: a song that matches the user's mood, energy, and acoustic preference can outrank a same-genre song that sounds very different. Since the catalog has only 1–3 songs per genre, the rest of the top 5 is mostly decided by energy and mood.
+
+### Potential Biases
+
+- **Over-prioritizing genre.** A genre match is worth 2.0 points, more than any other single feature. A song in a different genre that perfectly fits the user's mood and energy can rank below a same-genre song that sounds quite different.
+- **Exact text matching.** `pop` doesn't match `indie pop`, and `chill` doesn't match `relaxed` or `focused`. Songs with closely related labels get no credit, so users whose favorites have related labels are penalized.
+- **Uneven catalog.** Lofi has 3 songs, while most genres have only 1. Lofi fans get several genre matches; a metal or classical fan gets one, and the rest of their list is filled by energy alone.
+- **Labels reflect the person who wrote them.** Genre and mood were assigned by hand, and broad labels like "latin" lump very different styles together. The recommender inherits those choices.
+- **Simplified preferences.** `likes_acoustic` is yes/no, and one `target_energy` can't represent someone who likes both calm and intense music.
 
 ---
 
