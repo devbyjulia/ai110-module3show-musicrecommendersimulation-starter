@@ -53,7 +53,7 @@ This is a content-based recommender. It compares the features of each song with 
   | Mood | 1.0 | Exact match: 1.0, otherwise 0 | Mood matters but changes with the situation, and similar moods (chill, relaxed, focused) don't match as text. |
   | Acousticness | 0.5 | Rewards acoustic songs if `likes_acoustic`, non-acoustic songs if not | It overlaps heavily with energy, so a small weight avoids counting the same signal twice. |
 
-  **Worked example:** for the profile above, *Storm Runner* (rock, intense, energy 0.91, acousticness 0.10) scores 2.0 + 1.0 + 1.49 + 0.45 = **4.94**.
+  **Worked example:** for the profile above, *Storm Runner* (rock, intense, energy 0.91, acousticness 0.10) scores 2.0 + 1.0 + 1.48 + 0.45 = **4.93**. (Energy earns 1.5 × 0.99 = 1.485, which the program shows as 1.48 because of floating-point rounding.)
 
 - **How do you choose which songs to recommend**
 
@@ -116,18 +116,47 @@ You can add more tests in `tests/test_recommender.py`.
 
 ## Sample Recommendation Output
 
-Paste a sample of your recommender's output here as a text block so a reader can see what it produces:
-
 ```
-# e.g.:
-# User profile: genre=indie, mood=chill, energy=low
-# Recommendations:
-#   1. ...
-#   2. ...
-#   3. ...
-```
+Loaded 20 songs from ../data/songs.csv
+Profile: genre=pop | mood=happy | energy=0.80 | likes acoustic=yes
 
-**Screenshot or video** *(optional)*: <!-- Insert a screenshot or demo video link here -->
+Top 5 recommendations
+==================================================
+
+1. Sunrise City by Neon Echo
+   Score: 4.56 / 5.00
+   Why:
+     - genre match: pop (+2.0)
+     - mood match: happy (+1.0)
+     - energy 0.82 vs. your target 0.80 (+1.47)
+     - you prefer acoustic, song acousticness 0.18 (+0.09)
+
+2. Gym Hero by Max Pulse
+   Score: 3.33 / 5.00
+   Why:
+     - genre match: pop (+2.0)
+     - energy 0.93 vs. your target 0.80 (+1.30)
+     - you prefer acoustic, song acousticness 0.05 (+0.03)
+
+3. Rooftop Lights by Indigo Parade
+   Score: 2.61 / 5.00
+   Why:
+     - mood match: happy (+1.0)
+     - energy 0.76 vs. your target 0.80 (+1.44)
+     - you prefer acoustic, song acousticness 0.35 (+0.17)
+
+4. Dusty Porch Swing by Willow Creek Band
+   Score: 1.54 / 5.00
+   Why:
+     - energy 0.58 vs. your target 0.80 (+1.17)
+     - you prefer acoustic, song acousticness 0.74 (+0.37)
+
+5. Fiesta de Medianoche by Los Cometas
+   Score: 1.54 / 5.00
+   Why:
+     - energy 0.86 vs. your target 0.80 (+1.41)
+     - you prefer acoustic, song acousticness 0.25 (+0.12)
+```
 
 ---
 
