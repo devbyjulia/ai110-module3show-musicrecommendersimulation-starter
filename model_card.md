@@ -61,29 +61,26 @@ Prompts:
 
 ## 6. Limitations and Bias 
 
-Where the system struggles or behaves unfairly. 
-
-Prompts:  
-
-- Features it does not consider  
-- Genres or moods that are underrepresented  
-- Cases where the system overfits to one preference  
-- Ways the scoring might unintentionally favor some users  
+A weakness I discovered during the experiments is that genre locks in the top results. A genre match (+ 2.00) is worth as much as the best energy and acoustic scores combines (1.5 + 0.5). If the mood is also a match, a song with matching genre can never lose to one that doesn't match, so the user isn't pushed towards anything new.
 
 ---
 
-## 7. Evaluation  
+## 7. Evaluation
 
-How you checked whether the recommender behaved as expected. 
+I tested four different profiles:
+- High energy with sad mood
+- Genre fights every other preference
+- Acoustic preference contradicts the genre
+- Genre and mood that don't exist in the catalog
 
-Prompts:  
+What surprised me about genre fighting every other preference was the #1 song without a matching genre.
 
-- Which user profiles you tested  
-- What you looked for in the recommendations  
-- What surprised you  
-- Any simple tests or comparisons you ran  
+For high energy + sad vs. acoustic metalhead, both profiles asked for very high energy (0.9 and 0.97) and both said they like acoustic music, but their #1 picks are opposites. The sad profile's top song is Paper Boats, a quiet acoustic folk song (energy 0.31), while the metalhead's is Iron Cathedral, a loud song with almost no acoustic sound (acousticness 0.03). This makes sense because in both cases the #1 song was the one that matched both genre and mood (+3.0 points), which is more than energy and acousticness can ever add up to (2.0 at most).
 
-No need for numeric metrics unless you created some.
+For acoustic metalhead vs. metal-but-peaceful, both profiles have metal as their favorite genre, but Iron Cathedral drops from #1 (4.51) to #2 (2.21) when the user asks for a peaceful mood and low energy. Still Water Nocturne, a classical song, takes #1 instead. This makes sense: it matches three of the four preferences (mood, energy and acoustic), and together those outweigh a genre match on its own. This was the only test where genre did not win.
+
+For made-up genre and mood vs. everything else, when neither the genre (k-pop) nor the mood (bittersweet) exists in the catalog, the top score falls to 1.82, compared with 4+ when genre and mood both match. The list becomes mid-energy songs from unrelated genres (Velvet Hours, Kitchen Floor Blues, Island Time Again). This makes sense because only the energy and acoustic scores are left, so the system picks songs whose energy is close to 0.5. The problem is that it still presents these as normal recommendations and never tells the user that nothing actually matched.
+
 
 ---
 

@@ -160,6 +160,176 @@ Top 5 recommendations
 
 ---
 
+## Stress Testing with Diverse Profiles
+
+### Conflicting preferences: high energy but a sad mood.
+
+```
+Loaded 20 songs from ../data/songs.csv
+Profile: genre=folk | mood=sad | energy=0.90 | likes acoustic=yes
+
+Top 5 recommendations
+==================================================
+
+1. Paper Boats by Harbor & Pine
+   Score: 4.06 / 5.00
+   Why:
+     - genre match: folk (+2.0)
+     - mood match: sad (+1.0)
+     - energy 0.31 vs. your target 0.90 (+0.61)
+     - you prefer acoustic, song acousticness 0.90 (+0.45)
+
+2. Fiesta de Medianoche by Los Cometas
+   Score: 1.56 / 5.00
+   Why:
+     - energy 0.86 vs. your target 0.90 (+1.44)
+     - you prefer acoustic, song acousticness 0.25 (+0.12)
+
+3. Storm Runner by Voltline
+   Score: 1.53 / 5.00
+   Why:
+     - energy 0.91 vs. your target 0.90 (+1.48)
+     - you prefer acoustic, song acousticness 0.10 (+0.05)
+
+4. Gym Hero by Max Pulse
+   Score: 1.48 / 5.00
+   Why:
+     - energy 0.93 vs. your target 0.90 (+1.46)
+     - you prefer acoustic, song acousticness 0.05 (+0.03)
+
+5. Sunrise City by Neon Echo
+   Score: 1.47 / 5.00
+   Why:
+     - energy 0.82 vs. your target 0.90 (+1.38)
+     - you prefer acoustic, song acousticness 0.18 (+0.09)
+```
+
+### Genre fights every other preference
+
+```
+Loaded 20 songs from ../data/songs.csv
+Profile: genre=metal | mood=peaceful | energy=0.10 | likes acoustic=yes
+
+Top 5 recommendations
+==================================================
+
+1. Still Water Nocturne by Elise Varga
+   Score: 2.86 / 5.00
+   Why:
+     - mood match: peaceful (+1.0)
+     - energy 0.18 vs. your target 0.10 (+1.38)
+     - you prefer acoustic, song acousticness 0.97 (+0.48)
+
+2. Iron Cathedral by Black Vane
+   Score: 2.21 / 5.00
+   Why:
+     - genre match: metal (+2.0)
+     - energy 0.97 vs. your target 0.10 (+0.20)
+     - you prefer acoustic, song acousticness 0.03 (+0.01)
+
+3. Spacewalk Thoughts by Orbit Bloom
+   Score: 1.69 / 5.00
+   Why:
+     - energy 0.28 vs. your target 0.10 (+1.23)
+     - you prefer acoustic, song acousticness 0.92 (+0.46)
+
+4. Paper Boats by Harbor & Pine
+   Score: 1.64 / 5.00
+   Why:
+     - energy 0.31 vs. your target 0.10 (+1.19)
+     - you prefer acoustic, song acousticness 0.90 (+0.45)
+
+5. Library Rain by Paper Lanterns
+   Score: 1.55 / 5.00
+   Why:
+     - energy 0.35 vs. your target 0.10 (+1.12)
+     - you prefer acoustic, song acousticness 0.86 (+0.43)
+```
+
+### Acoustic preference contradicts the genre
+
+```
+Loaded 20 songs from ../data/songs.csv
+Profile: genre=metal | mood=angry | energy=0.97 | likes acoustic=yes
+
+Top 5 recommendations
+==================================================
+
+1. Iron Cathedral by Black Vane
+   Score: 4.51 / 5.00
+   Why:
+     - genre match: metal (+2.0)
+     - mood match: angry (+1.0)
+     - energy 0.97 vs. your target 0.97 (+1.50)
+     - you prefer acoustic, song acousticness 0.03 (+0.01)
+
+2. Neon Afterparty by Kiloglow
+   Score: 1.48 / 5.00
+   Why:
+     - energy 0.95 vs. your target 0.97 (+1.47)
+     - you prefer acoustic, song acousticness 0.02 (+0.01)
+
+3. Gym Hero by Max Pulse
+   Score: 1.47 / 5.00
+   Why:
+     - energy 0.93 vs. your target 0.97 (+1.44)
+     - you prefer acoustic, song acousticness 0.05 (+0.03)
+
+4. Storm Runner by Voltline
+   Score: 1.46 / 5.00
+   Why:
+     - energy 0.91 vs. your target 0.97 (+1.41)
+     - you prefer acoustic, song acousticness 0.10 (+0.05)
+
+5. Fiesta de Medianoche by Los Cometas
+   Score: 1.46 / 5.00
+   Why:
+     - energy 0.86 vs. your target 0.97 (+1.33)
+     - you prefer acoustic, song acousticness 0.25 (+0.12)
+```
+
+### Genre and mood that don't exist in the catalog
+
+```
+Loaded 20 songs from ../data/songs.csv
+Profile: genre=k-pop | mood=bittersweet | energy=0.50 | likes acoustic=no
+
+Top 5 recommendations
+==================================================
+
+1. Velvet Hours by Nia Solace
+   Score: 1.82 / 5.00
+   Why:
+     - energy 0.52 vs. your target 0.50 (+1.47)
+     - you prefer non-acoustic, song acousticness 0.30 (+0.35)
+
+2. Kitchen Floor Blues by Delta Mae
+   Score: 1.62 / 5.00
+   Why:
+     - energy 0.47 vs. your target 0.50 (+1.46)
+     - you prefer non-acoustic, song acousticness 0.66 (+0.17)
+
+3. Island Time Again by Sunny Roots
+   Score: 1.59 / 5.00
+   Why:
+     - energy 0.64 vs. your target 0.50 (+1.29)
+     - you prefer non-acoustic, song acousticness 0.40 (+0.30)
+
+4. Midnight Coding by LoRoom
+   Score: 1.52 / 5.00
+   Why:
+     - energy 0.42 vs. your target 0.50 (+1.38)
+     - you prefer non-acoustic, song acousticness 0.71 (+0.15)
+
+5. Concrete Crown by Verse Theory
+   Score: 1.52 / 5.00
+   Why:
+     - energy 0.78 vs. your target 0.50 (+1.08)
+     - you prefer non-acoustic, song acousticness 0.12 (+0.44)
+```
+
+---
+
 ## Experiments You Tried
 
 Use this section to document the experiments you ran. For example:
