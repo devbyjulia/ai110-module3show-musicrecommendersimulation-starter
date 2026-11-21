@@ -2,66 +2,58 @@
 
 ## 1. Model Name  
 
-Give your model a short, descriptive name.  
-Example: **VibeFinder 1.0**  
+Model MoodMatcher v1.
 
 ---
 
-## 2. Intended Use  
+## 2. Intended Use
 
-Describe what your recommender is designed to do and who it is for. 
-
-Prompts:  
-
-- What kind of recommendations does it generate  
-- What assumptions does it make about the user  
-- Is this for real users or classroom exploration  
+The recommender is designed to suggest songs from a 20-song catalog based on a user profile. The recommender uses a weighted formula to calculate a score for each song, then returns the top 5 songs. The system assumes that the user will favor genre over every other feature (mood, energy, acousticness), meaning that songs matching the user's genre usually take the #1 spot. It also assumes that users have one favorite genre, one favorite mood, one target energy level, and a yes/no preference for acoustic music. This project is intended for classroom exploration, not real users.
 
 ---
 
 ## 3. How the Model Works  
 
-Explain your scoring approach in simple language.  
+The user tells the model four things: their favorite genre, their favorite mood, how energetic they want the music to be (from 0 to 1), and whether they like acoustic music. The model then gives every song in the catalog points out of 5:
 
-Prompts:  
+- **Genre (up to 2 points):** full points if the song's genre matches the user's favorite, otherwise none.
+- **Mood (up to 1 point):** full points if the song's mood matches, otherwise none.
+- **Energy (up to 1.5 points):** the closer the song's energy is to what the user wants, the more points it gets.
+- **Acoustic (up to 0.5 points):** if the user likes acoustic music, more acoustic songs get more points; if not, less acoustic songs do.
 
-- What features of each song are used (genre, energy, mood, etc.)  
-- What user preferences are considered  
-- How does the model turn those into a score  
-- What changes did you make from the starter logic  
+The model adds up the points, sorts the songs from highest to lowest, and shows the top 5. If two songs tie, the one with energy closer to the user's target goes first. Each recommendation also lists where its points came from, so the user can see why it was picked.
 
-Avoid code here. Pretend you are explaining the idea to a friend who does not program.
+The starter code just returned the first 5 songs in the file, with a placeholder explanation. I replaced that with the point system above, the tie-breaker, and the explanations for each song.
 
 ---
 
 ## 4. Data  
 
-Describe the dataset the model uses.  
+The catalog has 20 songs. The starter file had 10, and I added 10 more to cover genres and moods it was missing. Each song has a title, artist, genre, mood, and number ratings for energy, tempo, valence, danceability, and acousticness. The model only uses genre, mood, energy, and acousticness.
 
-Prompts:  
+The songs cover 17 genres (including pop, lofi, rock, metal, jazz, classical, folk, hip hop, edm, and latin) and 16 moods (including happy, chill, intense, sad, angry, and peaceful). Coverage is uneven: lofi has 3 songs and pop has 2, but every other genre has only 1. Fans of most genres therefore get just one genre match.
 
-- How many songs are in the catalog  
-- What genres or moods are represented  
-- Did you add or remove data  
-- Are there parts of musical taste missing in the dataset  
+Some kinds of musical taste are missing. There are no high-energy acoustic songs and no high-energy sad songs, because none of the acoustic or sad songs in the catalog has an energy above 0.6. The data also has nothing about lyrics, language, era, or popularity, so it can't capture a taste for, say, 90s music or Spanish-language songs.
 
 ---
 
 ## 5. Strengths  
 
-Where does your system seem to work well  
+The system works best for users whose favorite genre and mood appear together in the catalog. For example, the acoustic metalhead profile (metal, angry, energy 0.97) got Iron Cathedral at #1 with 4.51 out of 5, far ahead of the next song at 1.48. That is the obvious right answer.
 
-Prompts:  
+The energy score is a sensible fallback. Once there are no more genre or mood matches, the remaining slots fill with songs at a similar energy level. The metalhead's #2 to #5 were all high-energy songs (0.86 to 0.95), which a fan of loud music would probably enjoy even outside metal.
 
-- User types for which it gives reasonable results  
-- Any patterns you think your scoring captures correctly  
-- Cases where the recommendations matched your intuition  
+Some results matched my intuition even when preferences conflicted. In the metal-but-peaceful test, Still Water Nocturne (classical, peaceful, very acoustic, low energy) beat the only metal song, because it matched three of the four preferences. That felt like a reasonable choice for someone asking for calm music.
+
+Finally, every recommendation explains where its points came from, so it is easy to see why a song was picked and to spot when the scoring is doing something odd.
+
+These strengths come from the same design as the main weakness in section 6: the large genre bonus that gives the metalhead a clear #1 is also what locks genre matches into the top spot and keeps users from discovering anything new.
 
 ---
 
 ## 6. Limitations and Bias 
 
-A weakness I discovered during the experiments is that genre locks in the top results. A genre match (+ 2.00) is worth as much as the best energy and acoustic scores combines (1.5 + 0.5). If the mood is also a match, a song with matching genre can never lose to one that doesn't match, so the user isn't pushed towards anything new.
+A weakness I discovered during the experiments is that genre locks in the top results. A genre match (+ 2.00) is worth as much as the best energy and acoustic scores combined (1.5 + 0.5). If the mood is also a match, a song with matching genre can never lose to one without a matching genre, so the user isn't pushed towards anything new.
 
 ---
 
@@ -86,23 +78,16 @@ For made-up genre and mood vs. everything else, when neither the genre (k-pop) n
 
 ## 8. Future Work  
 
-Ideas for how you would improve the model next.  
+- **Give partial credit for similar labels.** Right now "indie pop" gets nothing for a "pop" fan, and "melancholic" gets nothing for a "sad" fan. Grouping related genres and moods would fix this.
+- **Improve diversity in the top 5.** Limiting each artist to one song and each genre to two would push users toward something new instead of locking in the same genre.
+- **Rebalance the weights.** Lowering the genre bonus would let mood and energy matter more, so one matching label doesn't decide the #1 spot.
+- **Be honest when nothing matches.** If no song matches the user's genre or mood, the system should say so instead of presenting weak picks as normal recommendations.
 
-Prompts:  
-
-- Additional features or preferences  
-- Better ways to explain recommendations  
-- Improving diversity among the top results  
-- Handling more complex user tastes  
 
 ---
 
-## 9. Personal Reflection  
+## 9. Personal Reflection
 
-A few sentences about your experience.  
+I learned that real-world recommendation systems combine two approaches: content-based filtering and collaborative filtering. Content-based filtering recommends items with features resembling what the user already likes. Collaborative filtering learns from the behavioral patterns of many users. Something that surprised me was how much a single label matters. "Rooftop Lights" is a happy, high-energy song a pop fan would probably enjoy, but because it's labeled "indie pop" instead of "pop," my system gave it no genre credit. However, for profiles with songs that matched the profile well, this relatively simple recommender gave solid #1 recommendations that were clear matches; the starter pop profile is an example. This has given me a greater appreciation for music recommendation apps and the engineering that recommends me my next favorite song. 
 
-Prompts:  
-
-- What you learned about recommender systems  
-- Something unexpected or interesting you discovered  
-- How this changed the way you think about music recommendation apps  
+Using an AI assistant shaped my process in a few ways. It suggested adversarial and edge-case profiles I wouldn't have thought of on my own, such as conflicting preferences and genres that aren't in the catalog. I chose to run those tests myself and record the real output, so my evaluation is based on what my code actually did. When I had to pick a sensitivity experiment, it explained why a weight shift would reveal more than removing the mood check, which helped me understand how the weights balance against each other. It also pointed out biases in my scoring and data, like the uneven number of songs per genre, which I then checked against my own test results. Overall, the AI made me faster and pushed me to test more thoroughly, but I still had to verify its claims against my own code and results.

@@ -2,16 +2,9 @@
 
 ## Project Summary
 
-In this project you will build and explain a small music recommender system.
+MoodMatcher v1 is a small command-line music recommender. It loads a catalog of 20 songs from a CSV file and takes a user taste profile: favorite genre, favorite mood, target energy (0 to 1), and whether the user likes acoustic music. It scores every song out of 5 using a weighted formula (genre 2.0, energy 1.5, mood 1.0, acousticness 0.5), then prints the top 5 songs, each with its score and the reasons behind it.
 
-Your goal is to:
-
-- Represent songs and a user "taste profile" as data
-- Design a scoring rule that turns that data into recommendations
-- Evaluate what your system gets right and wrong
-- Reflect on how this mirrors real world AI recommenders
-
-Replace this paragraph with your own summary of what your version does.
+I also stress-tested the system with edge-case profiles, such as conflicting preferences and genres that aren't in the catalog. The tests showed that genre dominates the #1 spot, energy fills in the rest of the list, and the system never says when nothing really matched. The results and what they mean are in the sections below and in the [model card](model_card.md).
 
 ---
 
@@ -332,38 +325,33 @@ Top 5 recommendations
 
 ## Experiments You Tried
 
-Use this section to document the experiments you ran. For example:
+### Experiment 1: Different types of users
 
-- What happened when you changed the weight on genre from 2.0 to 0.5
-- What happened when you added tempo or valence to the score
-- How did your system behave for different types of users
+I ran four edge-case profiles (full output in [Stress Testing with Diverse Profiles](#stress-testing-with-diverse-profiles)) and compared them with the default pop/happy profile.
+
+| Profile | #1 song (score) | What happened |
+|---|---|---|
+| Pop / happy / 0.80 (default) | Sunrise City (4.56) | Worked as expected: the only pop + happy song won, and the other pop song came #2. |
+| Folk / sad / 0.90 | Paper Boats (4.06) | The user asked for high energy but got a quiet song (energy 0.31), because genre + mood (+3.0) outweigh the energy mismatch. |
+| Metal / peaceful / 0.10 | Still Water Nocturne (2.86) | Genre did **not** win: the classical song matched mood, energy and acoustic, which together beat the metal song's genre bonus (2.21). |
+| Metal / angry / 0.97 / acoustic | Iron Cathedral (4.51) | The acoustic preference changed nothing; at 0.5 points it is too weak to affect the ranking. |
+| K-pop / bittersweet / 0.50 | Velvet Hours (1.82) | Nothing matched, so only energy decided the list. Scores were low, but the output looked like normal recommendations. |
+
+**Pattern:** once the genre and mood matches run out, slots #2–5 are filled almost entirely by energy. For the folk/sad and metal/angry profiles, those slots were the same handful of high-energy songs (Fiesta de Medianoche, Storm Runner, Gym Hero, Neon Afterparty).
 
 ---
 
 ## Limitations and Risks
 
-Summarize some limitations of your recommender.
-
-Examples:
-
-- It only works on a tiny catalog
-- It does not understand lyrics or language
-- It might over favor one genre or mood
-
-You will go deeper on this in your model card.
+- Most genres have only one song
+- Limited catalog of 20 songs
+- Assumes users have one favorite genre and mood
+- Uses only part of the song features
 
 ---
 
 ## Reflection
 
-Read and complete `model_card.md`:
+Building this showed me that a recommender doesn't really "understand" music. It turns each song into a few numbers and labels, compares them with what the user said they like, and adds up points. The ranking that comes out depends almost entirely on the weights I chose. Giving genre 2.0 points sounded reasonable when I designed it, but the stress tests showed it decides the #1 spot almost every time. Once the genre and mood matches run out, energy is the only thing ranking the rest of the list. Small design choices like these shape what every user sees, and nothing in the output tells the user those choices were made.
 
-[**Model Card**](model_card.md)
-
-Write 1 to 2 paragraphs here about what you learned:
-
-- about how recommenders turn data into predictions
-- about where bias or unfairness could show up in systems like this
-
-
-
+I also learned that bias can come from the data as much as from the formula. Lofi fans get three genre matches while most other genres get one, so some users simply get better recommendations because of what happened to be in the catalog. Exact label matching means "indie pop" gets nothing for a "pop" fan, and when nothing matches at all, the system still presents weak picks as confident recommendations. In a real app with millions of songs and users, the same kinds of problems could keep people in a filter bubble or quietly favor popular genres. That makes me think recommenders need diverse data, more flexible matching, and honest explanations.
